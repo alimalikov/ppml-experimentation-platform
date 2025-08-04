@@ -98,3 +98,7 @@ ml_models/scripts/
 # Unwanted visualization summary files (local only)
 ml_models/visualization_summary_v1_copy.py
 ml_models/visualization_summary.py
+
+# Unwanted markdown files in ml_models (local only)
+ml_models/*.md
+ml_models/*/*.md
