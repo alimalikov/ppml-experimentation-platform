@@ -94,3 +94,7 @@ ml_models/core/visualization_integration_*.py
 ml_models/ml_performance_testing/
 ml_models/performance_testing/
 ml_models/scripts/
+
+# Unwanted visualization summary files (local only)
+ml_models/visualization_summary_v1_copy.py
+ml_models/visualization_summary.py
