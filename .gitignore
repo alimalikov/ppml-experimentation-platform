@@ -89,3 +89,8 @@ ml_models/core/summary_all_findings.txt
 ml_models/core/test_session_bridge.py
 ml_models/core/visualization_integration_*.py
 !ml_models/core/visualization_integration_pure.py
+
+# Unwanted folders in ml_models (local only)
+ml_models/ml_performance_testing/
+ml_models/performance_testing/
+ml_models/scripts/
