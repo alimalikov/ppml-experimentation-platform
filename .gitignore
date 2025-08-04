@@ -79,3 +79,13 @@ general_archive/
 THESIS_SOLUTION_ARCH/
 *.pdf
 *.pptx
+
+# Unwanted files in ml_models/core (local only)
+ml_models/core/app copy.py
+ml_models/core/ml_app copy.py
+ml_models/core/notes.txt
+ml_models/core/session_state_bridge_demo.py
+ml_models/core/summary_all_findings.txt
+ml_models/core/test_session_bridge.py
+ml_models/core/visualization_integration_*.py
+!ml_models/core/visualization_integration_pure.py
