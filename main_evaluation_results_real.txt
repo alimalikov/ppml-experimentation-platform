@@ -1,0 +1,202 @@
+\section{Evaluation}
+
+\subsection{Experimental Setup}
+
+The evaluation of the Privacy-Preserving Machine Learning (PPML) platform was conducted through a comprehensive experimental study using the expanded Iris dataset containing 1,500 instances across 5 features with a perfectly balanced 3-class target distribution (500 instances per class). The experimental design systematically evaluated three distinct privacy-preserving paradigms: k-Anonymity, Gaussian Mechanism (Differential Privacy), and Additive Noise techniques.
+
+The experimental framework employed three machine learning algorithms: Random Forest (100 trees, max depth 10), Linear Support Vector Machine (C=1.0, L2 regularization), and Logistic Regression (L2 penalty, LBFGS solver). Each privacy technique was tested with three different parameter configurations, resulting in 9 anonymized datasets compared against the original baseline, totaling 30 experimental runs (10 datasets × 3 models).
+
+The evaluation metrics encompassed standard classification measures including Accuracy, Precision, Recall, F1-Score, Balanced Accuracy, Cohen's Kappa, Matthews Correlation Coefficient (MCC), and ROC AUC Score. Additional model-specific internal metrics were collected, including Random Forest out-of-bag scores, feature importance statistics, tree structure metrics, and linear model coefficient analyses.
+
+\textbf{Privacy Method Configurations:} Three privacy-preserving approaches were systematically evaluated with varying parameter settings to assess the privacy-utility trade-off spectrum.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\centering\arraybackslash}p{1.5cm}|>{\raggedright\arraybackslash}p{8.5cm}|}
+\hline
+\rowcolor{lightgray}
+\textbf{Privacy Paradigm} & \textbf{Config.} & \textbf{Algorithmic Configuration and Technical Specifications} \\
+\hline
+\multirow{3}{*}{\textbf{K-Anonymity}\\\textit{(Syntactic Privacy)}} 
+    & \textbf{C1} & Anonymity parameter $k=5$ with complete quasi-identifier set, employing greedy generalization hierarchy for optimal information preservation \\
+\cline{2-3}
+    & \textbf{C2} & Anonymity parameter $k=5$ with selective quasi-identifier exclusion (\texttt{petal\_width} omitted), utilizing optimal generalization algorithms \\
+\cline{2-3}
+    & \textbf{C3} & Enhanced anonymity parameter $k=10$ with comprehensive quasi-identifier inclusion, optimal generalization with balanced privacy-utility optimization \\
+\hline
+\multirow{3}{*}{\textbf{Gaussian Mechanism}\newline\textit{(Differential Privacy)}} 
+    & \textbf{D1} & Privacy budget $\epsilon=1.0$, failure probability $\delta=1 \times 10^{-5}$, automatic sensitivity calibration with adaptive noise injection \\
+\cline{2-3}
+    & \textbf{D2} & Stricter privacy budget $\epsilon=0.5$, failure probability $\delta=1 \times 10^{-6}$, bounded differential privacy with clipping bounds $[0.0, 10.0]$ \\
+\cline{2-3}
+    & \textbf{D3} & High-privacy regime $\epsilon=0.1$, failure probability $\delta=1 \times 10^{-7}$, manual sensitivity $\sigma=2.0$, constrained clipping $[0.0, 8.0]$ \\
+\hline
+\multirow{3}{*}{\textbf{Additive Noise}\newline\textit{(Statistical Obfuscation)}} 
+    & \textbf{N1} & Gaussian noise perturbation with $5\%$ relative scaling factor computed against feature-wise standard deviation \\
+\cline{2-3}
+    & \textbf{N2} & Laplace noise mechanism with $10\%$ relative scaling factor, preserving statistical properties through symmetric noise distribution \\
+\cline{2-3}
+    & \textbf{N3} & Uniform noise injection with absolute scaling factor $\alpha=0.5$, bounded perturbation with range-preserving clipping mechanisms \\
+\hline
+\end{tabular}
+\caption{\textbf{Privacy Method Configurations}}
+\label{tab:privacy-configurations}
+\end{table}
+
+\subsection{Performance Results and Analysis}
+
+\subsubsection{Overall Method Performance Ranking}
+
+The experimental results reveal a clear performance hierarchy across privacy methods. K-Anonymity achieved the highest average F1-Score of 0.9756 across all 9 model evaluations, maintaining identical performance to the original dataset. Additive Noise techniques ranked second with an average F1-Score of 0.9567, demonstrating minimal utility loss. The Gaussian Mechanism exhibited severe performance degradation with an average F1-Score of 0.3349, representing a critical utility-privacy trade-off.
+
+\begin{table}[h!]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{4.2cm}|>{\raggedright\arraybackslash}p{2.7cm}|>{\centering\arraybackslash}p{1.5cm}|>{\centering\arraybackslash}p{1.5cm}|>{\centering\arraybackslash}p{2.5cm}|>{\centering\arraybackslash}p{2.2cm}|}
+\hline
+\rowcolor{lightgray}
+\textbf{Privacy Method / Variant} & \textbf{Model} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{Matthews Corr. Coeff. (MCC)} & \textbf{F1-Score \% Diff} \\
+\hline
+Original (Baseline) & Random Forest & 1.0000 & 1.0000 & 1.0000 & --- \\
+ & Linear SVM & 0.9500 & 0.9500 & 0.9250 & --- \\
+ & Logistic Regression & 0.9767 & 0.9767 & 0.9651 & --- \\
+\hline
+k-Anonymity (All Variants) & All Models & --- & --- & --- & $\rightarrow$ 0.00\% \\
+\hline
+Additive Noise (Gaussian, 5\%) & Random Forest & 0.9867 & 0.9867 & 0.9801 & $\downarrow$ -1.33\% \\
+ & Linear SVM & 0.9600 & 0.9600 & 0.9403 & $\uparrow$ +1.05\% \\
+ & Logistic Regression & 0.9700 & 0.9700 & 0.9551 & $\downarrow$ -0.68\% \\
+\hline
+Additive Noise (Laplace, 10\%) & Random Forest & 1.0000 & 1.0000 & 1.0000 & $\rightarrow$ 0.00\% \\
+\hline
+Gaussian Mechanism (Avg. $\epsilon=0.5$) & Random Forest & 0.3367 & 0.3358 & 0.0050 & $\downarrow$ -66.42\% \\
+ & Linear SVM & 0.3233 & 0.3180 & -0.0152 & $\downarrow$ -66.53\% \\
+ & Logistic Regression & 0.3233 & 0.3189 & -0.0152 & $\downarrow$ -67.35\% \\
+\hline
+\end{tabular}
+\caption{\textbf{Master Summary of Model Performance Across All Datasets.} Performance metrics for each privacy method and model, including accuracy, F1-Score, Matthews Correlation Coefficient (MCC), and relative F1-Score change compared to baseline.}
+\label{tab:master-summary-performance}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.5cm}|>{\centering\arraybackslash}p{1.0cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\centering\arraybackslash}p{1.5cm}|}
+\hline
+\rowcolor{lightgray}
+\textbf{Metric Category} & \textbf{Rank} & \textbf{Model} & \textbf{Value} \\
+\hline
+\multirow{3}{*}{\textbf{Accuracy}} 
+    & 1 & Random Forest & 0.7917 \\
+    & 2 & Logistic Regression & 0.7797 \\
+    & 3 & Linear SVM & 0.7670 \\
+\hline
+\multirow{3}{*}{\textbf{Precision}} 
+    & 1 & Random Forest & 0.7917 \\
+    & 2 & Logistic Regression & 0.7799 \\
+    & 3 & Linear SVM & 0.7675 \\
+\hline
+\multirow{3}{*}{\textbf{Recall}} 
+    & 1 & Random Forest & 0.7917 \\
+    & 2 & Logistic Regression & 0.7797 \\
+    & 3 & Linear SVM & 0.7670 \\
+\hline
+\multirow{3}{*}{\textbf{F1-Score}} 
+    & 1 & Random Forest & 0.7915 \\
+    & 2 & Logistic Regression & 0.7775 \\
+    & 3 & Linear SVM & 0.7641 \\
+\hline
+\multirow{3}{*}{\textbf{Balanced Accuracy}} 
+    & 1 & Random Forest & 0.7917 \\
+    & 2 & Logistic Regression & 0.7797 \\
+    & 3 & Linear SVM & 0.7670 \\
+\hline
+\multirow{3}{*}{\textbf{Cohen's Kappa}} 
+    & 1 & Random Forest & 0.6875 \\
+    & 2 & Logistic Regression & 0.6695 \\
+    & 3 & Linear SVM & 0.6505 \\
+\hline
+\multirow{3}{*}{\textbf{Matthews Corr. Coeff.}} 
+    & 1 & Random Forest & 0.6875 \\
+    & 2 & Logistic Regression & 0.6698 \\
+    & 3 & Linear SVM & 0.6508 \\
+\hline
+\multirow{3}{*}{\textbf{ROC AUC Score}} 
+    & 1 & Logistic Regression & 0.8486 \\
+    & 2 & Random Forest & 0.8468 \\
+    & 3 & Linear SVM & 0.0000 \\
+\hline
+\end{tabular}
+\caption{\textbf{Comprehensive Model Ranking by Metric.} Performance comparison of Random Forest, Logistic Regression, and Linear SVM across all major classification metrics, grouped by evaluation category.}
+\label{tab:model-metric-ranking}
+\end{table}
+
+\subsubsection{Detailed Performance Analysis by Privacy Method}
+
+\textbf{K-Anonymity Results:}
+All three k-Anonymity configurations (k=5, k=5 without petal\_width, k=10) demonstrated perfect utility preservation across all models and metrics. Random Forest maintained perfect accuracy (1.0000), precision (1.0000), recall (1.0000), and F1-Score (1.0000). Linear SVM and Logistic Regression similarly showed zero performance degradation, with accuracy scores of 0.9500 and 0.9767 respectively, identical to baseline performance.
+
+\textbf{Gaussian Mechanism Results:}
+The Gaussian Mechanism configurations exhibited catastrophic performance degradation across all models. The Random Forest model experienced F1-Score reductions of 65.7\% (ε=1.0), 66.4\% (ε=0.5), and 67.7\% (ε=0.1), with corresponding accuracy drops to 0.3433, 0.3367, and 0.3233 respectively. Linear SVM and Logistic Regression models demonstrated similar degradation patterns, with F1-Scores dropping to approximately 0.32-0.36 across all epsilon values.
+
+\textbf{Additive Noise Results:}
+Additive Noise techniques showed variable but generally acceptable performance impacts. Gaussian additive noise (5\% relative) resulted in minimal degradation: Random Forest F1-Score decreased by only 1.33\% to 0.9867, while Linear SVM actually improved slightly (+1.05\% to 0.9600). Laplace noise (10\% relative) maintained perfect performance across all models. Uniform noise (0.5 absolute) showed moderate degradation with F1-Score reductions of 7.34\% (Random Forest), 2.45\% (Linear SVM), and 5.79\% (Logistic Regression).
+
+\subsection{Model-Specific Robustness Analysis}
+
+\subsubsection{Random Forest Internal Metrics}
+
+Random Forest internal diagnostics revealed significant structural changes under different privacy methods. Under Gaussian Mechanism protection, tree structures became severely disrupted with mean tree depth increasing from 6.71 to 10.0 (+49.0\%), and mean tree nodes dramatically expanding from 23.78 to over 260 (+1000\% increase). The out-of-bag score dropped from 1.0 to 0.32 (-67.5\%), indicating complete model breakdown. Conversely, k-Anonymity preserved all internal metrics identically to baseline performance.
+
+\subsubsection{Linear Model Coefficient Analysis}
+
+Linear SVM and Logistic Regression models exhibited profound coefficient degradation under Gaussian Mechanism protection. The mean absolute coefficient for Linear SVM decreased from 0.9154 to approximately 0.03 (-97\% reduction), while convergence iterations dropped from 8 to 3, indicating premature convergence to suboptimal solutions. Logistic Regression showed similar patterns with coefficient norm reductions exceeding 98\% and convergence iterations decreasing from 19 to 2.
+
+\subsection{Statistical Significance and Correlation Analysis}
+
+The evaluation included comprehensive correlation analysis across all performance metrics. The results demonstrated near-perfect correlation (ρ > 0.998) among Accuracy, Precision, Recall, F1-Score, Balanced Accuracy, Cohen's Kappa, and Matthews Correlation Coefficient. This finding validates the use of F1-Score as a representative metric and confirms that performance degradation was systemic rather than isolated to specific classification aspects.
+
+The high correlation coefficients indicate that privacy-preserving transformations affected all aspects of model performance uniformly, suggesting that the observed changes represent fundamental alterations to the underlying data distribution rather than metric-specific artifacts.
+
+\subsection{Privacy-Utility Trade-off Assessment}
+
+The experimental results establish three distinct privacy-utility profiles:
+
+\textbf{Optimal Trade-off (K-Anonymity):} Achieved formal privacy guarantees with zero utility cost, representing the ideal privacy-utility balance for this dataset and task combination.
+
+\textbf{Acceptable Trade-off (Additive Noise):} Demonstrated tunable privacy-utility trade-offs with utility degradation ranging from 0\% to 7.34\% depending on noise parameters, providing practical privacy protection with minimal performance impact.
+
+\textbf{Unacceptable Trade-off (Gaussian Mechanism):} Resulted in catastrophic utility loss (60-67\% degradation) across all models and configurations, rendering the protected data unsuitable for meaningful machine learning applications.
+
+\subsection{Platform Validation and Limitations}
+
+The experimental evaluation successfully validated the PPML platform's capability to facilitate comprehensive privacy-utility trade-off analysis. The platform's ability to systematically compare multiple privacy methods, extract detailed model diagnostics, and provide quantitative trade-off assessments demonstrates its value for privacy-preserving machine learning research and applications.
+
+However, several limitations were identified. The Iris dataset's high class separability and relatively small dimensionality may not represent the complexity of real-world applications. The evaluation focused primarily on utility preservation without incorporating formal privacy risk assessment metrics. Future evaluations should include higher-dimensional datasets and quantitative privacy risk measures to provide more comprehensive privacy-utility analysis.
+
+The platform's strength lies in its systematic approach to evaluating privacy-preserving techniques, providing researchers and practitioners with the quantitative evidence needed to make informed decisions about privacy method selection and parameter tuning for specific applications and requirements.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Privacy-preserving machine learning (PPML) represents a critical challenge in modern data science, where the need to protect sensitive information must be balanced against maintaining model utility for meaningful analysis. While numerous privacy-preserving techniques exist—including k-anonymity, differential privacy mechanisms, and additive noise methods—practitioners lack systematic frameworks for evaluating and comparing these approaches across different machine learning contexts. The absence of comprehensive evaluation platforms makes it difficult to quantify privacy-utility trade-offs and select optimal anonymization strategies for specific applications, leading to suboptimal privacy protection or unnecessary utility degradation in real-world deployments.
+
+This thesis addresses this gap by developing a modular, plugin-based Privacy-Preserving Machine Learning experimentation platform that enables systematic evaluation and comparison of anonymization techniques. The solution employs a dual-module architecture separating anonymization processing from machine learning evaluation, coupled with a flexible plugin system that allows seamless integration of new privacy methods without core system modifications. The platform provides comprehensive evaluation capabilities through automated metric collection, comparative analysis frameworks, and intuitive visualization tools, enabling practitioners to make data-driven decisions about privacy method selection. Through this systematic approach, comprehensive experiments were conducted using multiple privacy paradigms across different machine learning algorithms, revealing that k-anonymity achieved perfect utility preservation, additive noise methods provided acceptable trade-offs, while differential privacy mechanisms resulted in catastrophic performance degradation. The platform's diagnostic capabilities demonstrated that privacy methods fundamentally alter model behavior patterns, with differential privacy causing complete structural breakdown in ensemble models and coefficient degradation exceeding 97% in linear models, establishing the critical importance of systematic evaluation frameworks for effective privacy-preserving machine learning deployment.

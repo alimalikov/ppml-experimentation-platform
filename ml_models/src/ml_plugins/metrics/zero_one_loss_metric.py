@@ -1,0 +1,54 @@
+import numpy as np
+from typing import Optional
+from sklearn.metrics import zero_one_loss
+from src.ml_plugins.base_metric_plugin import MetricPlugin
+
+class ZeroOneLossMetric(MetricPlugin):
+    """Zero-One Loss metric for classification tasks."""
+    
+    def __init__(self):
+        super().__init__()
+        self._name = "Zero-One Loss"
+        self._description = "Fraction of misclassifications. Strict metric where partial correctness gets no credit (opposite of accuracy)."
+        self._category = "Classification"
+        self._supports_classification = True
+        self._supports_regression = False
+        self._requires_probabilities = False
+        self._higher_is_better = False  # Lower loss is better
+        self._range = (0, 1)
+    
+    def get_name(self) -> str:
+        return self._name
+    
+    def get_description(self) -> str:
+        return self._description
+    
+    def calculate(self, y_true: np.ndarray, y_pred: np.ndarray, y_proba: Optional[np.ndarray] = None, **kwargs) -> float:
+        try:
+            normalize = kwargs.get('normalize', True)  # Return fraction by default
+            
+            return float(zero_one_loss(y_true, y_pred, normalize=normalize))
+        except Exception as e:
+            raise ValueError(f"Error calculating Zero-One Loss: {str(e)}")
+    
+    def get_category(self) -> str:
+        return self._category
+    
+    def supports_classification(self) -> bool:
+        return self._supports_classification
+    
+    def supports_regression(self) -> bool:
+        return self._supports_regression
+    
+    def requires_probabilities(self) -> bool:
+        return self._requires_probabilities
+    
+    def higher_is_better(self) -> bool:
+        return self._higher_is_better
+    
+    def get_range(self) -> tuple:
+        return self._range
+
+
+def get_metric_plugin() -> MetricPlugin:
+    return ZeroOneLossMetric()
