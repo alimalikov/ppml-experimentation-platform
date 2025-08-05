@@ -11,7 +11,7 @@ import numpy as np
 import os
 from datetime import datetime
 
-# Configure matplotlib for publication-quality output
+# Configure matplotlib for publication-quality output results
 plt.rcParams.update({
     'font.size': 18,
     'axes.titlesize': 22,
