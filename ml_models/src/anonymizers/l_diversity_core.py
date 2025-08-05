@@ -1,6 +1,78 @@
 """
-Core l-diversity implementation building on k-anonymity.
-This module provides l-diversity algorithms including distinct, entropy, and recursive diversity.
+L-Diversity Core Implementation
+=============================
+
+This module implements l-diversity algorithms building on k-anonymity for enhanced
+privacy protection. L-diversity ensures that each equivalence class contains at
+least l "well-represented" values for sensitive attributes, addressing the 
+homogeneity attack weakness of k-anonymity.
+
+Key diversity measures implemented:
+- Distinct l-diversity: Each equivalence class has at least l distinct sensitive values
+- Entropy l-diversity: Each equivalence class has entropy ≥ log(l)
+- Recursive (c,l)-diversity: Most frequent value appears < c times the sum of l-1 least frequent
+
+Privacy guarantees:
+- Builds upon k-anonymity foundation
+- Protects against homogeneity attacks
+- Provides stronger privacy for sensitive attributes
+- Supports multiple diversity measurement strategies
+
+References:
+----------
+Academic Papers:
+- Machanavajjhala, A., Kifer, D., Gehrke, J., & Venkitasubramaniam, M. (2007). 
+  L-diversity: Privacy beyond k-anonymity. ACM Transactions on Knowledge Discovery 
+  from Data (TKDD), 1(1), 3-es.
+- Li, N., Li, T., & Venkatasubramanian, S. (2007). t-closeness: Privacy beyond 
+  k-anonymity and l-diversity. In 2007 IEEE 23rd International Conference on 
+  Data Engineering (pp. 106-115).
+- Sweeney, L. (2002). k-anonymity: A model for protecting privacy. International 
+  Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 10(05), 557-570.
+- Ghinita, G., Karras, P., Kalnis, P., & Mamoulis, N. (2007). Fast data anonymization 
+  with low information loss. In Proceedings of the 33rd international conference 
+  on Very large data bases (pp. 758-769).
+
+Algorithm References:
+- Mondrian L-Diversity Algorithm:
+  LeFevre, K., DeWitt, D. J., & Ramakrishnan, R. (2006). Mondrian multidimensional 
+  k-anonymity (extended for l-diversity).
+- InfoGain Mondrian for L-Diversity:
+  Extension of Mondrian algorithm with information gain heuristics for l-diversity.
+
+Code References and Implementations:
+- Mondrian L-Diversity Implementation: 
+  https://github.com/qiyuangong/Mondrian_L_Diversity
+  - Python implementation for Mondrian L-Diversity algorithm
+  - Based on InfoGain Mondrian with NCP ~79.04% on adult dataset
+  - Extends Mondrian multidimensional k-anonymity for l-diversity
+- Nuclearstar K-Anonymity with L-Diversity: 
+  https://github.com/Nuclearstar/K-Anonymity
+  - Comprehensive k-anonymity and l-diversity implementation
+  - Uses Kolmogorov-Smirnov distance for diversity measurement
+  - Greedy search algorithm (Mondrian) for data partitioning
+- PyCANON Library: 
+  https://github.com/IFCA/pycanon
+  - Implements distinct, entropy, and recursive (c,l)-diversity
+  - Published in Scientific Data (Nature) journal
+  - Comprehensive anonymity parameter checking and reporting
+- ANJANA Library: 
+  https://github.com/IFCA-Advanced-Computing/anjana
+  - Entropy l-diversity and recursive (c,l)-diversity implementation
+  - Working examples with quasi-identifier hierarchies
+  - Application of k-anonymity, l-diversity, and t-closeness
+- ARX Framework: 
+  https://github.com/shoe54/arx-1
+  - Java implementation with k-anonymity, l-diversity, t-closeness
+  - Includes recursive-(c,l)-diversity, entropy-l-diversity, distinct l-diversity
+- Simple L-Diversity Implementations:
+  - https://github.com/Dharmik1710/L-diversity (Python implementation)
+  - https://github.com/pratyushlokhande/L-diversity-implementation (Equivalence class categorization)
+
+Diversity Type Definitions:
+- Distinct L-Diversity: Qi-block is l-diverse if |{s | (qi,s) ∈ qi-block}| ≥ l
+- Entropy L-Diversity: Qi-block satisfies Entropy(Q) ≥ log(l)
+- Recursive (c,l)-Diversity: r1 < c(rl + rl+1 + ... + rm) where ri are frequencies
 """
 
 import pandas as pd
@@ -16,6 +88,20 @@ warnings.filterwarnings('ignore')
 class LDiversityCore:
     """
     Core l-diversity implementation with multiple diversity measures.
+    
+    This class implements the three main types of l-diversity as defined in the
+    literature: distinct, entropy, and recursive (c,l)-diversity. It builds upon
+    k-anonymity to provide stronger privacy guarantees for sensitive attributes.
+    
+    The implementation follows the Mondrian approach for data partitioning and
+    includes group merging strategies to achieve l-diversity while minimizing
+    information loss.
+    
+    References:
+        - Machanavajjhala et al. (2007). L-diversity: Privacy beyond k-anonymity.
+        - Mondrian L-Diversity: https://github.com/qiyuangong/Mondrian_L_Diversity
+        - PyCANON implementation patterns: https://github.com/IFCA/pycanon
+        - ANJANA library approaches: https://github.com/IFCA-Advanced-Computing/anjana
     """
     
     def __init__(self, k: int, l: int, qi_columns: List[str], sensitive_column: str, 
@@ -110,12 +196,37 @@ class LDiversityCore:
             return self._check_distinct_l_diversity(sensitive_values)
     
     def _check_distinct_l_diversity(self, sensitive_values: pd.Series) -> bool:
-        """Check distinct l-diversity."""
+        """
+        Check distinct l-diversity.
+        
+        Distinct l-diversity requires each equivalence class to contain at least
+        l distinct values for the sensitive attribute. This is the simplest and
+        most commonly used form of l-diversity.
+        
+        References:
+            - Machanavajjhala et al. (2007): |{s | (qi,s) ∈ qi-block}| ≥ l
+            - PyCANON distinct l-diversity implementation
+            - ANJANA library distinct diversity checking
+        """
         unique_values = sensitive_values.nunique()
         return unique_values >= self.l
     
     def _check_entropy_l_diversity(self, sensitive_values: pd.Series) -> bool:
-        """Check entropy l-diversity."""
+        """
+        Check entropy l-diversity.
+        
+        Entropy l-diversity requires that the entropy of the distribution of
+        sensitive values in each equivalence class is at least log(l). This
+        provides stronger privacy guarantees than distinct l-diversity.
+        
+        Formula: Entropy(Q) = -∑p(Q,s)log(p(Q,s)) ≥ log(l)
+        
+        References:
+            - Machanavajjhala et al. (2007): Entropy l-diversity definition
+            - PyCANON entropy l-diversity implementation
+            - ANJANA library entropy diversity calculation
+            - ARX framework entropy-l-diversity implementation
+        """
         value_counts = sensitive_values.value_counts()
         total_count = len(sensitive_values)
         
@@ -130,7 +241,23 @@ class LDiversityCore:
         return entropy >= math.log2(self.l)
     
     def _check_recursive_l_diversity(self, sensitive_values: pd.Series) -> bool:
-        """Check recursive (c,l)-diversity."""
+        """
+        Check recursive (c,l)-diversity.
+        
+        Recursive (c,l)-diversity ensures that the most frequent sensitive value
+        does not appear too frequently compared to the other values. It addresses
+        the limitation where distinct l-diversity might allow one value to dominate.
+        
+        Condition: r1 < c(rl + rl+1 + ... + rm)
+        where ri are frequencies in descending order and c is a constant ≥ 1.
+        
+        References:
+            - Machanavajjhala et al. (2007): Recursive (c,l)-diversity definition
+            - PyCANON recursive (c,l)-diversity implementation
+            - ANJANA library recursive diversity calculation
+            - ARX framework recursive-(c,l)-diversity implementation
+            - Nuclearstar implementation with Kolmogorov-Smirnov distance
+        """
         value_counts = sensitive_values.value_counts().sort_values(ascending=False)
         
         if len(value_counts) < self.l:
@@ -299,12 +426,16 @@ def apply_l_diversity(df: pd.DataFrame, k: int, l: int, qi_columns: List[str],
                      sensitive_column: str, diversity_type: str = "distinct",
                      generalization_strategy: str = "optimal") -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
-    Apply l-diversity to a dataframe.
+    Apply l-diversity to a dataframe using the specified diversity measure.
+    
+    This function provides a high-level interface for applying l-diversity
+    anonymization. It first ensures k-anonymity and then enforces the specified
+    type of l-diversity constraint on the sensitive attribute.
     
     Args:
-        df: Input dataframe
-        k: The k parameter for k-anonymity
-        l: The l parameter for l-diversity
+        df: Input dataframe to anonymize
+        k: The k parameter for k-anonymity (l-diversity builds on k-anonymity)
+        l: The l parameter for l-diversity (minimum diversity requirement)
         qi_columns: List of quasi-identifier columns
         sensitive_column: The sensitive attribute column
         diversity_type: Type of diversity ("distinct", "entropy", "recursive")
@@ -312,6 +443,15 @@ def apply_l_diversity(df: pd.DataFrame, k: int, l: int, qi_columns: List[str],
         
     Returns:
         Tuple of (anonymized_dataframe, metrics_dict)
+        
+    References:
+        - Machanavajjhala, A., et al. (2007). L-diversity: Privacy beyond k-anonymity.
+        - Implementation patterns from:
+          * Mondrian L-Diversity: https://github.com/qiyuangong/Mondrian_L_Diversity
+          * PyCANON library: https://github.com/IFCA/pycanon
+          * ANJANA library: https://github.com/IFCA-Advanced-Computing/anjana
+        - Algorithm approach based on InfoGain Mondrian for L-Diversity
+        - Group merging and generalization strategies from Nuclearstar implementation
     """
     anonymizer = LDiversityCore(k, l, qi_columns, sensitive_column, diversity_type, generalization_strategy)
     anonymized_df = anonymizer.anonymize(df)

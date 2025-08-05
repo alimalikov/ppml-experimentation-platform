@@ -18,8 +18,40 @@ Privacy Parameters:
 - sensitivity: Maximum change in output when one record changes
 
 References:
-- Dwork, C. (2006). Differential privacy
-- Dwork, C., & Roth, A. (2014). The algorithmic foundations of differential privacy
+----------
+Academic Papers:
+- Dwork, C. (2006). Differential privacy. In International colloquium on automata, 
+  languages, and programming (pp. 1-12). Springer.
+- Dwork, C., & Roth, A. (2014). The algorithmic foundations of differential privacy. 
+  Foundations and Trends in Theoretical Computer Science, 9(3-4), 211-407.
+- McSherry, F., & Talwar, K. (2007). Mechanism design via differential privacy. 
+  In 48th Annual IEEE Symposium on Foundations of Computer Science (pp. 94-103).
+- Balle, B., & Wang, Y. X. (2018). Improving the gaussian mechanism for differential 
+  privacy: Analytical calibration and optimal denoising. In International Conference 
+  on Machine Learning (pp. 394-403).
+- Warner, S. L. (1965). Randomized response: A survey technique for eliminating 
+  evasive answer bias. Journal of the American Statistical Association, 60(309), 63-69.
+
+Code References and Implementations:
+- IBM Differential Privacy Library (diffprivlib): 
+  https://github.com/IBM/differential-privacy-library
+  - Laplace mechanism: diffprivlib/mechanisms/laplace.py
+  - Gaussian mechanism: diffprivlib/mechanisms/gaussian.py
+- Google Differential Privacy Library: 
+  https://github.com/google/differential-privacy
+  - Secure noise generation for Laplace and Gaussian mechanisms
+- OpenMined PyDP (Python wrapper for Google's DP): 
+  https://github.com/OpenMined/PyDP
+  - BoundedMean algorithm implementation
+- Analytic Gaussian Mechanism: 
+  https://github.com/BorjaBalle/analytic-gaussian-mechanism
+  - Implementation based on Balle & Wang (2018)
+- Exponential Mechanism (Base-2): 
+  https://github.com/cilvento/b2_exponential_mechanism
+  - High precision exponential mechanism implementation
+- Practical Data Privacy: 
+  https://github.com/kjam/practical-data-privacy
+  - Randomized response implementation examples
 """
 
 import numpy as np
@@ -129,6 +161,10 @@ class DifferentialPrivacyCore:
         """
         Apply Laplace mechanism for differential privacy.
         
+        The Laplace mechanism adds noise drawn from the Laplace distribution
+        to achieve ε-differential privacy. The noise scale is calibrated to
+        the sensitivity of the function and the privacy parameter ε.
+        
         Args:
             data: Input data (can be Series, array, or scalar)
             sensitivity: Global sensitivity of the function
@@ -136,6 +172,14 @@ class DifferentialPrivacyCore:
             
         Returns:
             Data with Laplace noise added
+            
+        References:
+            - Dwork, C., McSherry, F., Nissim, K., & Smith, A. (2006). 
+              Calibrating noise to sensitivity in private data analysis.
+            - IBM diffprivlib implementation: 
+              https://github.com/IBM/differential-privacy-library/blob/main/diffprivlib/mechanisms/laplace.py
+            - Google DP library: 
+              https://github.com/google/differential-privacy
         """
         self.validate_privacy_parameters(epsilon)
         
@@ -180,6 +224,10 @@ class DifferentialPrivacyCore:
         """
         Apply Gaussian mechanism for (ε,δ)-differential privacy.
         
+        The Gaussian mechanism provides (ε,δ)-differential privacy by adding
+        Gaussian noise with variance calibrated to the sensitivity and privacy
+        parameters. Often provides better utility than Laplace mechanism.
+        
         Args:
             data: Input data
             sensitivity: Global sensitivity
@@ -188,6 +236,15 @@ class DifferentialPrivacyCore:
             
         Returns:
             Data with Gaussian noise added
+            
+        References:
+            - Dwork, C., & Roth, A. (2014). The algorithmic foundations of differential privacy.
+            - Balle, B., & Wang, Y. X. (2018). Improving the gaussian mechanism for 
+              differential privacy: Analytical calibration and optimal denoising.
+            - IBM diffprivlib Gaussian mechanism: 
+              https://github.com/IBM/differential-privacy-library/blob/main/diffprivlib/mechanisms/gaussian.py
+            - Analytic Gaussian Mechanism: 
+              https://github.com/BorjaBalle/analytic-gaussian-mechanism
         """
         self.validate_privacy_parameters(epsilon, delta)
         
@@ -236,6 +293,10 @@ class DifferentialPrivacyCore:
         """
         Apply exponential mechanism for selecting from discrete candidates.
         
+        The exponential mechanism selects an output from a discrete set of candidates
+        with probability proportional to the exponential of their utility scores.
+        Useful for categorical data and discrete optimization problems.
+        
         Args:
             candidates: List of candidate values
             utility_scores: Utility score for each candidate
@@ -244,6 +305,13 @@ class DifferentialPrivacyCore:
             
         Returns:
             Selected candidate
+            
+        References:
+            - McSherry, F., & Talwar, K. (2007). Mechanism design via differential privacy.
+            - Exponential Mechanism (Base-2): 
+              https://github.com/cilvento/b2_exponential_mechanism
+            - IBM diffprivlib exponential mechanism: 
+              https://github.com/IBM/differential-privacy-library/blob/main/diffprivlib/mechanisms/exponential.py
         """
         self.validate_privacy_parameters(epsilon)
         
@@ -277,6 +345,10 @@ class DifferentialPrivacyCore:
         """
         Apply randomized response mechanism for categorical data.
         
+        Randomized response is a technique for collecting sensitive information
+        while preserving plausible deniability. Each respondent has a probability
+        of giving their true answer and a probability of giving a random answer.
+        
         Args:
             data: Input categorical data
             epsilon: Privacy parameter
@@ -284,6 +356,16 @@ class DifferentialPrivacyCore:
             
         Returns:
             Perturbed categorical data
+            
+        References:
+            - Warner, S. L. (1965). Randomized response: A survey technique for 
+              eliminating evasive answer bias. Journal of the American Statistical Association.
+            - Practical Data Privacy: 
+              https://github.com/kjam/practical-data-privacy
+            - OpenMined tutorial on randomized response: 
+              https://blog.openmined.org/randomized-response-in-privacy/
+            - Differential Privacy for Categorical Data: 
+              https://github.com/llgeek/K-anonymity-and-Differential-Privacy
         """
         self.validate_privacy_parameters(epsilon)
         

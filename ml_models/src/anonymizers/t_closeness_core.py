@@ -1,6 +1,68 @@
 """
-Core t-closeness implementation building on l-diversity.
-This module provides t-closeness algorithms using various distance measures.
+T-Closeness Core Implementation
+=============================
+
+This module implements t-closeness algorithms building on l-diversity for enhanced
+privacy protection. T-closeness requires that the distribution of sensitive attributes
+in each equivalence class is "close" to the global distribution, where closeness
+is measured using various distance metrics.
+
+Key distance measures implemented:
+- Earth Mover's Distance (EMD/Wasserstein): Original t-closeness metric
+- Kullback-Leibler (KL) Divergence: Information-theoretic distance
+- Jensen-Shannon (JS) Divergence: Symmetric version of KL divergence
+
+Privacy guarantees:
+- Builds upon k-anonymity and l-diversity foundations
+- Controls distribution similarity between local and global sensitive attributes
+- Protects against attribute disclosure through distribution analysis
+- Handles both ordinal and categorical sensitive data appropriately
+
+References:
+----------
+Academic Papers:
+- Li, N., Li, T., & Venkatasubramanian, S. (2007). t-closeness: Privacy beyond 
+  k-anonymity and l-diversity. In IEEE 23rd International Conference on Data Engineering.
+- Machanavajjhala, A., Kifer, D., Gehrke, J., & Venkitasubramaniam, M. (2007). 
+  L-diversity: Privacy beyond k-anonymity. ACM TKDD.
+- Sweeney, L. (2002). k-anonymity: A model for protecting privacy. International 
+  Journal of Uncertainty, Fuzziness and Knowledge-Based Systems.
+
+Distance Metric References:
+- Earth Mover's Distance: Rubner, Y., et al. (2000). The earth mover's distance 
+  as a metric for image retrieval. International Journal of Computer Vision.
+- Kullback-Leibler Divergence: Kullback, S., & Leibler, R. A. (1951). On information 
+  and sufficiency. The Annals of Mathematical Statistics.
+- Jensen-Shannon Divergence: Lin, J. (1991). Divergence measures based on the 
+  Shannon entropy. IEEE Transactions on Information Theory.
+
+Code References and Implementations:
+- pyCANON Anonymity Checking: 
+  https://github.com/cetic/pycanon
+  - t_closeness function in anonymity.py for compliance checking
+  - EMD calculation for ordinal vs categorical data handling
+  - Global vs local distribution comparison logic
+- AnonyPy with Mondrian: 
+  https://github.com/AnonyPy/AnonyPy
+  - Integrated t-closeness checking in partition.py
+  - is_t_close method for distribution-based privacy validation
+  - EMD implementation with numerical/categorical distinction
+- ARX Anonymization Tool: 
+  https://github.com/arx-deidentifier/arx
+  - Production-grade t-closeness with generalization hierarchies
+  - Comprehensive handling of different data types for EMD
+  - Advanced metrics for privacy compliance and information loss
+- SciPy Statistical Functions:
+  - scipy.stats.entropy for KL divergence calculations
+  - scipy.spatial.distance.jensenshannon for JS divergence
+  - Statistical distance metric implementations
+
+Implementation Patterns:
+- Global distribution baseline calculation and caching
+- Multiple distance metric support (EMD, KL, JS divergence)
+- Ordinal vs categorical data type detection and handling
+- Post-processing violation fixes through merging and suppression
+- Comprehensive privacy and utility metrics calculation
 """
 
 import pandas as pd
@@ -18,6 +80,11 @@ warnings.filterwarnings('ignore')
 class TClosenessCore:
     """
     Core t-closeness implementation with multiple distance measures.
+    
+    # Implements distribution-based privacy protection beyond l-diversity
+    # Ensures distance(local_dist, global_dist) ≤ t for all equivalence classes
+    # Ref: Li et al. (2007), pyCANON and AnonyPy implementation patterns
+    # Supports EMD (original), KL divergence, and JS divergence metrics
     """
     
     def __init__(self, k: int, l: int, t: float, qi_columns: List[str], sensitive_column: str,
@@ -52,7 +119,12 @@ class TClosenessCore:
         self.global_distribution = None
         
     def fit_global_distribution(self, df: pd.DataFrame) -> None:
-        """Fit the global distribution of the sensitive attribute."""
+        """Fit the global distribution of the sensitive attribute.
+        
+        # Baseline distribution calculation for t-closeness comparison
+        # Ref: pyCANON and AnonyPy global distribution establishment
+        # Used as reference for measuring local distribution closeness
+        """
         if self.sensitive_column not in df.columns:
             raise ValueError(f"Sensitive column '{self.sensitive_column}' not found in dataframe")
         
@@ -110,7 +182,12 @@ class TClosenessCore:
             return df
     
     def _is_t_close(self, group: pd.DataFrame) -> bool:
-        """Check if a group satisfies t-closeness."""
+        """Check if a group satisfies t-closeness.
+        
+        # Core t-closeness validation: distance(P_local, P_global) ≤ t
+        # Ref: pyCANON anonymity.py t_closeness function (direct parallel)
+        # AnonyPy is_t_close method for distribution comparison
+        """
         if self.sensitive_column not in group.columns:
             return True
         
@@ -120,15 +197,22 @@ class TClosenessCore:
             return True
         
         # Calculate local distribution
+        # Normalize to probability distribution for distance calculation
         local_distribution = sensitive_values.value_counts(normalize=True).sort_index()
         
         # Calculate distance between local and global distributions
+        # Core t-closeness constraint check
         distance = self._calculate_distance(local_distribution, self.global_distribution)
         
         return distance <= self.t
     
     def _calculate_distance(self, local_dist: pd.Series, global_dist: pd.Series) -> float:
-        """Calculate distance between two distributions."""
+        """Calculate distance between two distributions.
+        
+        # Multi-metric support: EMD (original), KL divergence, JS divergence
+        # Ref: Li et al. (2007) original EMD, scipy implementations for KL/JS
+        # pyCANON uses EMD, extending with information-theoretic measures
+        """
         if self.distance_metric == "earth_movers":
             return self._earth_movers_distance(local_dist, global_dist)
         elif self.distance_metric == "kl_divergence":
@@ -139,8 +223,14 @@ class TClosenessCore:
             return self._earth_movers_distance(local_dist, global_dist)
     
     def _earth_movers_distance(self, local_dist: pd.Series, global_dist: pd.Series) -> float:
-        """Calculate Earth Mover's Distance (Wasserstein distance)."""
+        """Calculate Earth Mover's Distance (Wasserstein distance).
+        
+        # Original t-closeness metric from Li et al. (2007)
+        # Ref: pyCANON __emd function, AnonyPy EMD implementation
+        # Handles ordinal vs categorical data with appropriate distance calculations
+        """
         # Align the distributions to have the same index
+        # Ensure both distributions cover the same value domain
         all_values = sorted(set(local_dist.index).union(set(global_dist.index)))
         
         local_aligned = np.array([local_dist.get(val, 0) for val in all_values])
@@ -148,6 +238,7 @@ class TClosenessCore:
         
         # For categorical data, we use a simplified version
         # In practice, you might need to define proper distances between categories
+        # Ref: pyCANON and AnonyPy ordinal vs categorical distinction
         if self._is_ordinal_data(all_values):
             return self._ordinal_earth_movers_distance(local_aligned, global_aligned, all_values)
         else:
@@ -166,20 +257,36 @@ class TClosenessCore:
             return any(pattern in val for val in values_lower for pattern in ordinal_patterns)
     
     def _ordinal_earth_movers_distance(self, local_dist: np.ndarray, global_dist: np.ndarray, values: List) -> float:
-        """Calculate Earth Mover's Distance for ordinal data."""
+        """Calculate Earth Mover's Distance for ordinal data.
+        
+        # Standard EMD for ordered data using cumulative distributions
+        # Ref: pyCANON __emd implementation, Rubner et al. (2000) EMD definition
+        # Sum of absolute differences of cumulative distributions
+        """
         cumsum_local = np.cumsum(local_dist)
         cumsum_global = np.cumsum(global_dist)
         
         # Sum of absolute differences of cumulative distributions
+        # Classic EMD formula for 1D ordinal data
         return np.sum(np.abs(cumsum_local - cumsum_global))
     
     def _categorical_earth_movers_distance(self, local_dist: np.ndarray, global_dist: np.ndarray) -> float:
-        """Calculate Earth Mover's Distance for categorical data."""
+        """Calculate Earth Mover's Distance for categorical data.
+        
+        # Total variation distance approximation for unordered categorical data
+        # Ref: pyCANON and AnonyPy categorical handling, standard practice
+        # Since no natural ordering exists, use L1 distance / 2
+        """
         # For categorical data, use total variation distance as approximation
         return 0.5 * np.sum(np.abs(local_dist - global_dist))
     
     def _kl_divergence(self, local_dist: pd.Series, global_dist: pd.Series) -> float:
-        """Calculate Kullback-Leibler divergence."""
+        """Calculate Kullback-Leibler divergence.
+        
+        # Information-theoretic distance measure: D_KL(P||Q) = Σ P(x) log(P(x)/Q(x))
+        # Ref: Kullback & Leibler (1951), scipy.stats.entropy implementation
+        # Extension beyond original EMD for t-closeness
+        """
         # Align the distributions
         all_values = sorted(set(local_dist.index).union(set(global_dist.index)))
         
@@ -187,14 +294,21 @@ class TClosenessCore:
         global_aligned = np.array([global_dist.get(val, 1e-10) for val in all_values])
         
         # Normalize to ensure they sum to 1
+        # Required for valid probability distributions
         local_aligned = local_aligned / local_aligned.sum()
         global_aligned = global_aligned / global_aligned.sum()
         
         # Calculate KL divergence: D_KL(P||Q) = sum(P * log(P/Q))
+        # Information content difference between distributions
         return np.sum(local_aligned * np.log(local_aligned / global_aligned))
     
     def _js_divergence(self, local_dist: pd.Series, global_dist: pd.Series) -> float:
-        """Calculate Jensen-Shannon divergence."""
+        """Calculate Jensen-Shannon divergence.
+        
+        # Symmetric version of KL divergence: JS(P,Q) = 0.5*KL(P||M) + 0.5*KL(Q||M)
+        # Ref: Lin (1991), scipy.spatial.distance.jensenshannon
+        # Bounded metric [0,1] unlike KL divergence
+        """
         # Align the distributions
         all_values = sorted(set(local_dist.index).union(set(global_dist.index)))
         
@@ -208,10 +322,16 @@ class TClosenessCore:
             global_aligned = global_aligned / global_aligned.sum()
         
         # Use scipy's Jensen-Shannon distance
+        # Square root of JS divergence, metric property guaranteed
         return jensenshannon(local_aligned, global_aligned)
     
     def _fix_t_closeness_violation(self, group: pd.DataFrame, full_df: pd.DataFrame) -> pd.DataFrame:
-        """Fix t-closeness violation by merging with other groups or additional processing."""
+        """Fix t-closeness violation by merging with other groups or additional processing.
+        
+        # Two-stage approach: 1) merge with compatible groups, 2) suppress violations
+        # Ref: AnonyPy integrated approach, ARX generalization hierarchies
+        # Alternative to pyCANON's checking-only approach
+        """
         # Strategy 1: Try to merge with groups that would improve t-closeness
         merged_group = self._try_merge_for_t_closeness(group, full_df)
         if merged_group is not None and self._is_t_close(merged_group):
@@ -342,19 +462,32 @@ def apply_t_closeness(df: pd.DataFrame, k: int, l: int, t: float, qi_columns: Li
     """
     Apply t-closeness to a dataframe.
     
+    # High-level interface for t-closeness anonymization
+    # Builds upon k-anonymity and l-diversity with distribution closeness constraints
+    # Ref: Li et al. (2007), pyCANON/AnonyPy implementation patterns
+    
     Args:
-        df: Input dataframe
-        k: The k parameter for k-anonymity
-        l: The l parameter for l-diversity
-        t: The t parameter for t-closeness
+        df: Input dataframe to anonymize
+        k: The k parameter for k-anonymity (minimum group size)
+        l: The l parameter for l-diversity (minimum diversity requirement)
+        t: The t parameter for t-closeness (maximum distance threshold)
         qi_columns: List of quasi-identifier columns
         sensitive_column: The sensitive attribute column
         distance_metric: Distance metric ("earth_movers", "kl_divergence", "js_divergence")
-        diversity_type: Type of diversity for l-diversity
+        diversity_type: Type of diversity for l-diversity base layer
         generalization_strategy: Strategy for generalization
         
     Returns:
         Tuple of (anonymized_dataframe, metrics_dict)
+        
+    References:
+        - Li, N., et al. (2007): t-closeness: Privacy beyond k-anonymity and l-diversity
+        - Implementation patterns from:
+          * pyCANON: https://github.com/cetic/pycanon (anonymity checking)
+          * AnonyPy: https://github.com/AnonyPy/AnonyPy (integrated partitioning)
+          * ARX: https://github.com/arx-deidentifier/arx (production-grade implementation)
+        - Distance metrics: EMD (original), KL/JS divergence (extensions)
+        - Global distribution baseline with local distribution comparison
     """
     anonymizer = TClosenessCore(k, l, t, qi_columns, sensitive_column, distance_metric, 
                                diversity_type, generalization_strategy)
