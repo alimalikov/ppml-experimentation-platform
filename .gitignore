@@ -106,3 +106,6 @@ ml_models/*/*.md
 # Unwanted utility scripts in ml_models (local only)
 ml_models/data_preprocessor.py
 ml_models/check_plugins.py
+
+# Unwanted dashboard analysis folder in ml_models/src (local only)
+ml_models/src/dashboard_analyse/
