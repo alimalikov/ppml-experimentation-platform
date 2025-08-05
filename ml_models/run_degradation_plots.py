@@ -1,26 +1,25 @@
-#!/usr/bin/env python3
 """
-Simplified script to generate only degradation plots for thesis analysis.
-This script runs the grouped degradation analysis without the full application interface.
+Script to generate degradation plots for thesis analysis.
+Runs grouped degradation analysis without full application interface.
 """
 
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend for Windows compatibility
+matplotlib.use('Agg')  # Non-interactive backend for compatibility
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import os
 from datetime import datetime
 
-# Set up matplotlib for thesis-quality output
+# Configure matplotlib for publication-quality output
 plt.rcParams.update({
-    'font.size': 18,           # Increased from 12
-    'axes.titlesize': 22,      # Increased from 16  
-    'axes.labelsize': 20,      # Increased from 14
-    'xtick.labelsize': 16,     # Increased from 12
-    'ytick.labelsize': 16,     # Increased from 12
-    'legend.fontsize': 16,     # Increased from 12
-    'figure.titlesize': 24,    # Increased from 18
+    'font.size': 18,
+    'axes.titlesize': 22,
+    'axes.labelsize': 20,
+    'xtick.labelsize': 16,
+    'ytick.labelsize': 16,
+    'legend.fontsize': 16,
+    'figure.titlesize': 24,
     'font.family': 'serif',
     'font.serif': ['Times New Roman', 'Times', 'serif'],
     'text.usetex': False,
@@ -30,14 +29,14 @@ plt.rcParams.update({
 })
 
 def create_grouped_plot(data, metric_list, title, output_dir):
-    """Create a subplot for specific metrics group"""
+    """Create subplot for specified metrics group"""
     available_metrics = [m for m in metric_list if m in data[list(data.keys())[0]][list(data[list(data.keys())[0]].keys())[0]]]
     
     if not available_metrics:
         print(f"⚠️ No metrics available for {title}")
         return
     
-    # Calculate number of rows and columns for subplots
+    # Calculate subplot dimensions
     n_metrics = len(available_metrics)
     cols = min(2, n_metrics)
     rows = (n_metrics + cols - 1) // cols
@@ -50,7 +49,7 @@ def create_grouped_plot(data, metric_list, title, output_dir):
     else:
         axes = axes.flatten()
     
-    # Hide extra subplots if any
+    # Hide unused subplots
     for i in range(n_metrics, len(axes)):
         axes[i].set_visible(False)
     
@@ -59,7 +58,7 @@ def create_grouped_plot(data, metric_list, title, output_dir):
     for idx, metric in enumerate(available_metrics):
         ax = axes[idx]
         
-        # Extract data for this metric
+        # Extract metric data
         techniques = list(data.keys())
         x_labels = []
         y_values = {alg: [] for alg in data[techniques[0]].keys()}
@@ -69,7 +68,7 @@ def create_grouped_plot(data, metric_list, title, output_dir):
             for algorithm, metrics in data[technique].items():
                 y_values[algorithm].append(metrics.get(metric, 0))
         
-        # Create the plot
+        # Generate bar plot
         x_pos = np.arange(len(x_labels))
         width = 0.25
         
@@ -77,7 +76,7 @@ def create_grouped_plot(data, metric_list, title, output_dir):
             ax.bar(x_pos + i * width, values, width, 
                   label=algorithm, color=colors[i], alpha=0.8)
         
-        # Customize the plot
+        # Format subplot
         ax.set_title(f'{metric.replace("_", " ").title()}', fontsize=20, pad=15)
         ax.set_xlabel('Privacy Technique', fontsize=18)
         ax.set_ylabel('Score', fontsize=18)
@@ -86,18 +85,18 @@ def create_grouped_plot(data, metric_list, title, output_dir):
         ax.grid(True, alpha=0.3)
         ax.set_ylim(0, 1.05)
         
-        # Format y-axis to show percentages
+        # Format y-axis as percentages
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.1%}'))
     
-    # Add legend above the entire figure
+    # Add legend
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.98), 
               ncol=len(labels), fontsize=16, frameon=False)
     
     plt.tight_layout()
-    plt.subplots_adjust(top=0.9)  # Make room for legend
+    plt.subplots_adjust(top=0.9)
     
-    # Save the plot
+    # Save plot
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_title = title.lower().replace(' ', '_').replace('-', '_')
     filename = f"degradation_analysis_{safe_title}_{timestamp}.png"
@@ -108,9 +107,9 @@ def create_grouped_plot(data, metric_list, title, output_dir):
     plt.close()
 
 def run_degradation_analysis():
-    """Run the complete degradation analysis with grouped plots"""
+    """Execute degradation analysis with grouped plots"""
     
-    # Hardcoded test data (replace with your actual data loading mechanism)
+    # Sample data for demonstration
     sample_data = {
         "Original": {
             "Logistic Regression": {"accuracy": 0.9767, "precision": 0.9769, "recall": 0.9767, "f1_score": 0.9767, "balanced_accuracy": 0.9767, "matthews_correlation": 0.9651, "roc_auc": 0.9992},
