@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend to prevent Windows GUI issues
+matplotlib.use('Agg')  # Non-interactive backend for server environments
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -8,20 +8,20 @@ import os
 from matplotlib import rcParams
 import matplotlib.patches as mpatches
 
-# Set global style for publication-quality plots
+# Configure publication-quality visualization settings
 plt.style.use('default')
 sns.set_palette("husl")
 
-# Professional publication settings with Porsche Next TT font
+# Academic publication typography and layout parameters
 rcParams['font.family'] = 'Porsche Next TT'
-rcParams['font.size'] = 16          # Increased from 12 for better thesis readability
-rcParams['axes.titlesize'] = 20     # Increased from 16
-rcParams['axes.labelsize'] = 18     # Increased from 14
-rcParams['xtick.labelsize'] = 15    # Increased from 11
-rcParams['ytick.labelsize'] = 15    # Increased from 11
-rcParams['legend.fontsize'] = 16    # Increased from 12
-rcParams['legend.title_fontsize'] = 17  # Increased from 13
-rcParams['figure.titlesize'] = 22   # Increased from 18
+rcParams['font.size'] = 16
+rcParams['axes.titlesize'] = 20
+rcParams['axes.labelsize'] = 18
+rcParams['xtick.labelsize'] = 15
+rcParams['ytick.labelsize'] = 15
+rcParams['legend.fontsize'] = 16
+rcParams['legend.title_fontsize'] = 17
+rcParams['figure.titlesize'] = 22
 rcParams['figure.dpi'] = 300
 rcParams['savefig.dpi'] = 300
 rcParams['savefig.bbox'] = 'tight'
@@ -34,12 +34,12 @@ rcParams['grid.linewidth'] = 0.8
 rcParams['lines.linewidth'] = 2.5
 rcParams['lines.markersize'] = 8
 
-# Clean, bright professional color palette
-PROFESSIONAL_COLORS = ['#007ACC', '#FF6B35', '#28A745']  # Bright Blue, Orange, Green
+# Colorblind-friendly palette for academic publications
+PROFESSIONAL_COLORS = ['#007ACC', '#FF6B35', '#28A745']
 MODEL_COLORS = {
-    'Logistic Regression': '#007ACC',  # Bright blue
-    'Random Forest': '#FF6B35',       # Bright orange
-    'XGBoost': '#28A745'              # Bright green
+    'Logistic Regression': '#007ACC',
+    'Random Forest': '#FF6B35',
+    'XGBoost': '#28A745'
 }
 
 TECHNIQUE_COLORS = {
@@ -55,7 +55,7 @@ TECHNIQUE_COLORS = {
     'Randomized Response (High)': '#C05621'
 }
 
-# Results data structure: results[dataset][anonymization][model][metric] = value
+# Experimental results: nested dictionary structure for performance metrics
 results = {
     "Iris": {
         "Original": {
@@ -219,7 +219,7 @@ def plot_summary_bar(results, dataset, metric, save_path=None):
     """
     Create a grouped bar chart showing how anonymization affects model performance for a given dataset and metric.
     """
-    # Prepare data for plotting
+    # Transform nested results into DataFrame for visualization
     data = []
     for anonymization, models in results.get(dataset, {}).items():
         for model, metrics in models.items():
@@ -236,10 +236,10 @@ def plot_summary_bar(results, dataset, metric, save_path=None):
     
     df = pd.DataFrame(data)
     
-    # Create professional figure
+    # Initialize figure with academic formatting
     fig, ax = plt.subplots(figsize=(16, 10))
     
-    # Professional bar plot with improved styling matching ml_performance_tester
+    # Generate grouped bar chart with consistent styling
     bar_plot = sns.barplot(
         data=df,
         x="Anonymization",
@@ -252,25 +252,25 @@ def plot_summary_bar(results, dataset, metric, save_path=None):
         alpha=0.9
     )
     
-    # Professional styling matching ml_performance_tester standards
+    # Apply academic formatting standards
     ax.set_title(f'{dataset} Dataset - {metric.replace("_", " ").title()} Performance', 
-                fontsize=18, fontweight='bold', pad=20)    # Increased from 14
-    ax.set_ylabel(f'{metric.replace("_", " ").title()}', fontsize=16, fontweight='semibold')  # Increased from 12
-    ax.set_xlabel('Anonymization Technique', fontsize=16, fontweight='semibold')  # Increased from 12
+                fontsize=18, fontweight='bold', pad=20)
+    ax.set_ylabel(f'{metric.replace("_", " ").title()}', fontsize=16, fontweight='semibold')
+    ax.set_xlabel('Anonymization Technique', fontsize=16, fontweight='semibold')
     
-    # Rotate x-axis labels for better readability  
-    plt.xticks(rotation=45, ha='right', fontsize=14)  # Increased from 10
-    plt.yticks(fontsize=15)  # Increased from 11
+    # Optimize label orientation for clarity
+    plt.xticks(rotation=45, ha='right', fontsize=14)
+    plt.yticks(fontsize=15)
     
-    # Professional legend styling
-    legend = ax.legend(title='ML Algorithm', fontsize=14, title_fontsize=15,   # Increased from 10 and 11
+    # Configure legend with academic standards
+    legend = ax.legend(title='ML Algorithm', fontsize=14, title_fontsize=15,
                       loc='upper right', frameon=True, fancybox=True, shadow=True)
     legend.get_frame().set_facecolor('white')
     legend.get_frame().set_alpha(0.95)
     legend.get_frame().set_edgecolor('lightgray')
     
-    # Add value labels ONLY on the tallest bars to avoid clutter
-    # Get the maximum value for each x position
+    # Label only highest bars to maintain visual clarity
+    # Identify maximum values per x-position
     x_positions = {}
     for i, container in enumerate(bar_plot.containers):
         for j, bar in enumerate(container):
@@ -279,23 +279,23 @@ def plot_summary_bar(results, dataset, metric, save_path=None):
             if x_pos not in x_positions or height > x_positions[x_pos]['height']:
                 x_positions[x_pos] = {'height': height, 'container_idx': i, 'bar_idx': j}
     
-    # Only add labels to the tallest bars
+    # Apply selective labeling strategy
     for container_idx, container in enumerate(bar_plot.containers):
         for bar_idx, bar in enumerate(container):
             x_pos = bar.get_x() + bar.get_width() / 2
             height = bar.get_height()
             if x_positions[x_pos]['container_idx'] == container_idx and x_positions[x_pos]['bar_idx'] == bar_idx:
                 ax.text(x_pos, height + 0.01, f'{height:.3f}', 
-                       ha='center', va='bottom', fontsize=12, fontweight='semibold')  # Increased from 9
+                       ha='center', va='bottom', fontsize=12, fontweight='semibold')
     
-    # Set y-axis limits for better visualization
+    # Optimize y-axis range for data visibility
     ax.set_ylim(0, max(df[metric]) * 1.1)
     
-    # Professional grid styling matching ml_performance_tester
+    # Apply consistent grid formatting
     ax.grid(True, alpha=0.3, linestyle='-', linewidth=0.8, axis='y')
     ax.set_axisbelow(True)
     
-    # Remove top and right spines for cleaner look
+    # Minimize chart junk for academic presentation
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
@@ -311,12 +311,12 @@ def plot_anonymization_impact_heatmap(results, dataset, save_path=None):
     """
     Create a heatmap showing the impact of different anonymization techniques across all models and metrics.
     """
-    # Prepare data for heatmap
+    # Structure data for heatmap visualization
     anonymization_techniques = list(results[dataset].keys())
     models = list(results[dataset][anonymization_techniques[0]].keys())
     metrics = list(results[dataset][anonymization_techniques[0]][models[0]].keys())
     
-    # Create matrix for heatmap
+    # Build performance matrix
     heatmap_data = []
     labels = []
     
@@ -334,11 +334,11 @@ def plot_anonymization_impact_heatmap(results, dataset, save_path=None):
     plt.figure(figsize=(10, 12))
     ax = sns.heatmap(heatmap_df, annot=True, fmt='.3f', cmap='RdYlGn', 
                      cbar_kws={'label': 'Performance Score'}, 
-                     linewidths=0.5, linecolor='white', annot_kws={'fontsize': 12})  # Added annotation font size
+                     linewidths=0.5, linecolor='white', annot_kws={'fontsize': 12})
     ax.set_title(f"{dataset} Dataset - Performance Heatmap\nAnonymization Impact Across Models and Metrics", 
-                 fontsize=20, fontweight='bold', pad=20)    # Increased from 16
-    ax.set_xlabel("Metrics", fontsize=18)    # Increased from 14
-    ax.set_ylabel("Anonymization Technique & Model", fontsize=18)    # Increased from 14
+                 fontsize=20, fontweight='bold', pad=20)
+    ax.set_xlabel("Metrics", fontsize=18)
+    ax.set_ylabel("Anonymization Technique & Model", fontsize=18)
     
     plt.tight_layout()
     if save_path:
@@ -352,10 +352,10 @@ def plot_performance_degradation(results, dataset, save_path=None):
     """
     Create a professional line plot showing performance degradation from original to anonymized versions.
     """
-    # Get original performance as baseline
+    # Establish baseline performance metrics
     original_data = results[dataset]["Original"]
     
-    # Prepare data for line plot
+    # Structure data for degradation analysis
     plot_data = []
     anonymization_order = ["Original", 
                           "Micro Aggregation (Minimal)", "Micro Aggregation (Medium)", "Micro Aggregation (High)",
@@ -375,10 +375,10 @@ def plot_performance_degradation(results, dataset, save_path=None):
     
     df = pd.DataFrame(plot_data)
     
-    # Get available metrics (handle both 4-metric and 7-metric datasets)
+    # Determine metric set for adaptive layout
     available_metrics = list(original_data[list(original_data.keys())[0]].keys())
     
-    # Determine subplot layout based on number of metrics
+    # Configure subplot grid based on metric count
     if len(available_metrics) == 4:
         fig, axes = plt.subplots(2, 2, figsize=(18, 14))
         axes = axes.flatten()
@@ -408,31 +408,31 @@ def plot_performance_degradation(results, dataset, save_path=None):
                        markerfacecolor='white', markeredgewidth=2,
                        markeredgecolor=PROFESSIONAL_COLORS[j])
         
-        # Professional styling
+        # Apply academic formatting
         ax.set_title(f"{metric.replace('_', ' ').title()} Performance Trends", 
-                    fontsize=20, fontweight='bold', pad=15)    # Increased from 16
-        ax.set_ylabel(f"{metric.replace('_', ' ').title()}", fontsize=18, fontweight='semibold')  # Increased from 14
-        ax.set_xlabel("Anonymization Technique", fontsize=18, fontweight='semibold')  # Increased from 14
+                    fontsize=20, fontweight='bold', pad=15)
+        ax.set_ylabel(f"{metric.replace('_', ' ').title()}", fontsize=18, fontweight='semibold')
+        ax.set_xlabel("Anonymization Technique", fontsize=18, fontweight='semibold')
         ax.set_xticks(range(len(anonymization_order)))
         ax.set_xticklabels([anon.replace(" (", "\n(") for anon in anonymization_order], 
-                          rotation=45, ha='right', fontsize=15)    # Increased from 11
+                          rotation=45, ha='right', fontsize=15)
         
-        # Professional grid and styling
+        # Configure grid and visual elements
         ax.grid(True, alpha=0.4, linestyle='-', linewidth=0.8)
         ax.set_axisbelow(True)
         
-        # Professional legend only on first subplot
+        # Single legend to avoid redundancy
         if i == 0:
-            legend = ax.legend(fontsize=16, title="ML Model", title_fontsize=17,    # Increased from 13 and 14
+            legend = ax.legend(fontsize=16, title="ML Model", title_fontsize=17,
                               loc='upper right', frameon=True, fancybox=True, shadow=True)
             legend.get_frame().set_facecolor('white')
             legend.get_frame().set_alpha(0.9)
         
         ax.set_ylim(0, 1.05)
-        ax.tick_params(labelsize=15)    # Increased from 11
+        ax.tick_params(labelsize=15)
     
     plt.suptitle(f"{dataset} Dataset\nML Performance Degradation Analysis Across Anonymization Techniques", 
-                 fontsize=24, fontweight='bold', y=0.98)    # Increased from 20
+                 fontsize=24, fontweight='bold', y=0.98)
     plt.tight_layout()
     
     if save_path:
@@ -442,31 +442,31 @@ def plot_performance_degradation(results, dataset, save_path=None):
         plt.show()
     plt.close()
     
-    # Additional grouped plots
-    if len(available_metrics) >= 7:  # Only create grouped plots if we have enough metrics
-        # Core metrics plot (Accuracy, Precision, Recall, F1-Score)
+    # Generate supplementary metric-specific analyses
+    if len(available_metrics) >= 7:  # Generate grouped analyses for comprehensive datasets
+        # Primary classification metrics
         core_metrics = ['accuracy', 'precision', 'recall', 'f1_score']
         available_core = [m for m in core_metrics if m in available_metrics]
         
-        if len(available_core) >= 2:  # Only create if we have at least 2 core metrics
+        if len(available_core) >= 2:  # Ensure sufficient metrics for meaningful analysis
             _create_grouped_plot(df, available_core, dataset, "Core Metrics (Accuracy, Precision, Recall, F1)", 
                                save_path, "_core_metrics")
         
-        # Extended metrics plot (Balanced Accuracy, Matthews Correlation, ROC AUC)
+        # Advanced performance indicators
         extended_metrics = ['balanced_accuracy', 'matthews_correlation', 'roc_auc']
         available_extended = [m for m in extended_metrics if m in available_metrics]
         
-        if len(available_extended) >= 2:  # Only create if we have at least 2 extended metrics
+        if len(available_extended) >= 2:  # Validate metric availability
             _create_grouped_plot(df, available_extended, dataset, "Extended Metrics (Balanced Accuracy, MCC, ROC AUC)", 
                                save_path, "_extended_metrics")
 
 def _create_grouped_plot(df, selected_metrics, dataset, plot_title, base_save_path, suffix):
-    """Helper function to create grouped degradation plots with legend above the chart"""
+    """Generate metric-specific degradation plots with optimized layout"""
     
-    # Filter data for selected metrics
+    # Extract relevant metric subset
     filtered_df = df[df['Metric'].isin(selected_metrics)]
     
-    # Determine subplot layout
+    # Configure subplot arrangement
     num_metrics = len(selected_metrics)
     if num_metrics <= 2:
         fig, axes = plt.subplots(1, num_metrics, figsize=(9 * num_metrics, 7))
@@ -481,7 +481,7 @@ def _create_grouped_plot(df, selected_metrics, dataset, plot_title, base_save_pa
     
     models = sorted(filtered_df['Model'].unique())
     
-    # Create plots for each metric
+    # Generate individual metric visualizations
     for i, metric in enumerate(selected_metrics):
         ax = axes[i]
         metric_data = filtered_df[filtered_df['Metric'] == metric]
@@ -495,7 +495,7 @@ def _create_grouped_plot(df, selected_metrics, dataset, plot_title, base_save_pa
                    markerfacecolor='white', markeredgewidth=2,
                    markeredgecolor=PROFESSIONAL_COLORS[j])
         
-        # Professional styling
+        # Apply academic formatting
         ax.set_title(f"{metric.replace('_', ' ').title()} Performance Trends", 
                     fontsize=20, fontweight='bold', pad=15)
         ax.set_ylabel(f"{metric.replace('_', ' ').title()}", fontsize=18, fontweight='semibold')
@@ -509,17 +509,17 @@ def _create_grouped_plot(df, selected_metrics, dataset, plot_title, base_save_pa
         ax.set_axisbelow(True)
         ax.set_ylim(0, 1.05)
     
-    # Hide unused subplots
+    # Remove excess subplot panels
     for i in range(len(selected_metrics), len(axes)):
         fig.delaxes(axes[i])
     
-    # Create shared legend above the plots
+    # Position unified legend
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.95), 
                ncol=len(models), fontsize=17, title="Machine Learning Model", 
                title_fontsize=18, frameon=True, fancybox=True, shadow=True)
     
-    # Remove individual legends
+    # Eliminate redundant legends
     for ax in axes[:len(selected_metrics)]:
         ax.legend().remove() if ax.get_legend() else None
     
@@ -539,7 +539,7 @@ def plot_anonymization_comparison(results, dataset, save_path=None):
     """
     Create a professional comprehensive comparison showing the trade-off between privacy and utility.
     """
-    # Define privacy levels (higher number = more privacy)
+    # Quantify privacy intensity for trade-off analysis
     privacy_levels = {
         "Original": 0,
         "Micro Aggregation (Minimal)": 1,
@@ -553,7 +553,7 @@ def plot_anonymization_comparison(results, dataset, save_path=None):
         "Randomized Response (High)": 9
     }
     
-    # Prepare data for scatter plot
+    # Structure data for privacy-utility visualization
     plot_data = []
     for anon_tech, models in results[dataset].items():
         privacy_score = privacy_levels.get(anon_tech, 0)
@@ -569,10 +569,10 @@ def plot_anonymization_comparison(results, dataset, save_path=None):
     
     df = pd.DataFrame(plot_data)
     
-    # Create professional scatter plot
+    # Initialize scatter plot with academic formatting
     fig, ax = plt.subplots(figsize=(14, 10))
     
-    # Create scatter plot with different markers for each model
+    # Generate model-specific scatter points
     markers = ['o', 's', '^']  # circle, square, triangle
     for i, model in enumerate(["Logistic Regression", "Random Forest", "XGBoost"]):
         model_data = df[df['Model'] == model]
@@ -581,33 +581,33 @@ def plot_anonymization_comparison(results, dataset, save_path=None):
                            s=150, alpha=0.8, edgecolors='white', linewidth=2,
                            label=model)
     
-    # Professional styling
+    # Apply academic formatting standards
     ax.set_title(f"{dataset} Dataset\nPrivacy vs. Utility Trade-off Analysis", 
-                fontsize=24, fontweight='bold', pad=25)    # Increased from 20
-    ax.set_xlabel("Privacy Level (Higher = More Private)", fontsize=20, fontweight='semibold')  # Increased from 16
-    ax.set_ylabel("Model Accuracy (Utility)", fontsize=20, fontweight='semibold')  # Increased from 16
+                fontsize=24, fontweight='bold', pad=25)
+    ax.set_xlabel("Privacy Level (Higher = More Private)", fontsize=20, fontweight='semibold')
+    ax.set_ylabel("Model Accuracy (Utility)", fontsize=20, fontweight='semibold')
     
-    # Professional grid
+    # Configure grid system
     ax.grid(True, alpha=0.4, linestyle='-', linewidth=0.8)
     ax.set_axisbelow(True)
     
-    # Professional legend
-    legend = ax.legend(title="Machine Learning Model", fontsize=17, title_fontsize=18,  # Increased from 14 and 15
+    # Position legend with academic standards
+    legend = ax.legend(title="Machine Learning Model", fontsize=17, title_fontsize=18,
                       loc='lower left', frameon=True, fancybox=True, shadow=True)
     legend.get_frame().set_facecolor('white')
     legend.get_frame().set_alpha(0.9)
     
-    # Customize x-axis labels
+    # Configure axis labeling
     ax.set_xticks(range(10))
     ax.set_xticklabels(['Original', 'MA-Min', 'MA-Med', 'MA-High', 
                        'DP-Min', 'DP-Med', 'DP-High',
                        'RR-Min', 'RR-Med', 'RR-High'], 
-                      rotation=45, ha='right', fontsize=16)    # Increased from 12
+                      rotation=45, ha='right', fontsize=16)
     
-    ax.tick_params(labelsize=16)    # Increased from 12
+    ax.tick_params(labelsize=16)
     ax.set_ylim(0, 1.05)
     
-    # Add trend line
+    # Overlay regression trend
     x_vals = df['Privacy_Level'].values
     y_vals = df['Utility_Score'].values
     z = np.polyfit(x_vals, y_vals, 1)
@@ -627,10 +627,10 @@ def plot_percentage_degradation(results, dataset, save_path=None):
     """
     Create a professional bar chart showing percentage degradation from original performance.
     """
-    # Get original performance as baseline
+    # Establish baseline performance metrics
     original_data = results[dataset]["Original"]
     
-    # Calculate percentage degradation
+    # Compute relative performance loss
     degradation_data = []
     for anon, models in results[dataset].items():
         if anon == "Original":
@@ -650,10 +650,10 @@ def plot_percentage_degradation(results, dataset, save_path=None):
     
     df = pd.DataFrame(degradation_data)
     
-    # Get available metrics
+    # Determine metric configuration
     available_metrics = list(original_data[list(original_data.keys())[0]].keys())
     
-    # Create subplot layout based on number of metrics
+    # Configure subplot grid
     if len(available_metrics) == 4:
         fig, axes = plt.subplots(2, 2, figsize=(16, 12))
         axes = axes.flatten()
@@ -679,15 +679,15 @@ def plot_percentage_degradation(results, dataset, save_path=None):
                                  edgecolor='white', linewidth=1.5, alpha=0.9)
         
         ax.set_title(f"{metric.replace('_', ' ').title()} - Performance Degradation", 
-                    fontsize=18, fontweight='bold')    # Increased from 12
-        ax.set_ylabel("Performance Degradation (%)", fontsize=16)    # Increased from 11
-        ax.set_xlabel("Anonymization Technique", fontsize=16)    # Increased from 11
-        ax.tick_params(axis='x', rotation=45, labelsize=14)    # Increased from 9
-        ax.tick_params(axis='y', labelsize=15)    # Increased from 10
+                    fontsize=18, fontweight='bold')
+        ax.set_ylabel("Performance Degradation (%)", fontsize=16)
+        ax.set_xlabel("Anonymization Technique", fontsize=16)
+        ax.tick_params(axis='x', rotation=45, labelsize=14)
+        ax.tick_params(axis='y', labelsize=15)
         
-        # Clean legend styling
-        if i == 0:  # Only show legend on first subplot
-            legend = ax.legend(fontsize=14, title="ML Algorithm", title_fontsize=15)    # Increased from 9 and 10
+        # Configure legend formatting
+        if i == 0:  # Single legend to avoid redundancy
+            legend = ax.legend(fontsize=14, title="ML Algorithm", title_fontsize=15)
             legend.get_frame().set_facecolor('white')
             legend.get_frame().set_alpha(0.9)
         else:
@@ -697,11 +697,11 @@ def plot_percentage_degradation(results, dataset, save_path=None):
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
         
-        # Add minimal value labels - only on bars > 10% degradation to avoid clutter
+        # Label significant degradations only
         for container in ax.containers:
             for bar in container:
                 height = bar.get_height()
-                if height > 10:  # Only label significant degradations
+                if height > 10:  # Threshold for visual clarity
                     ax.text(bar.get_x() + bar.get_width()/2., height + 1,
                            f'{height:.0f}%', ha='center', va='bottom', 
                            fontsize=8, fontweight='semibold')
@@ -721,7 +721,7 @@ def plot_model_impact_analysis(results, dataset, save_path=None):
     """
     Create a visualization showing how each anonymization technique affects different models.
     """
-    # Prepare data for model impact analysis
+    # Structure data for comparative analysis
     original_data = results[dataset]["Original"]
     
     impact_data = []
@@ -730,7 +730,7 @@ def plot_model_impact_analysis(results, dataset, save_path=None):
             continue
             
         for model, metrics in models.items():
-            # Calculate average impact across all metrics
+            # Compute aggregate performance impact
             total_degradation = 0
             metric_count = 0
             
@@ -752,29 +752,29 @@ def plot_model_impact_analysis(results, dataset, save_path=None):
     
     df = pd.DataFrame(impact_data)
     
-    # Create a comprehensive model impact visualization
+    # Initialize dual-panel comparison
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
     
-    # Left plot: Average degradation by model and anonymization technique
+    # Panel 1: Degradation sensitivity heatmap
     pivot_degradation = df.pivot(index="Anonymization", columns="Model", values="Average Degradation (%)")
     sns.heatmap(pivot_degradation, annot=True, fmt='.1f', cmap='Reds', ax=ax1, 
-                cbar_kws={'label': 'Average Degradation (%)'}, annot_kws={'fontsize': 12})  # Added annotation font size
+                cbar_kws={'label': 'Average Degradation (%)'}, annot_kws={'fontsize': 12})
     ax1.set_title("Model Sensitivity to Anonymization\n(Average Degradation %)", 
-                  fontsize=18, fontweight='bold')    # Increased from 14
-    ax1.set_xlabel("Model", fontsize=16)    # Increased from 12
-    ax1.set_ylabel("Anonymization Technique", fontsize=16)    # Increased from 12
+                  fontsize=18, fontweight='bold')
+    ax1.set_xlabel("Model", fontsize=16)
+    ax1.set_ylabel("Anonymization Technique", fontsize=16)
     
-    # Right plot: Performance after anonymization
+    # Panel 2: Absolute performance retention
     pivot_performance = df.pivot(index="Anonymization", columns="Model", values="Performance After")
     sns.heatmap(pivot_performance, annot=True, fmt='.3f', cmap='RdYlGn', ax=ax2,
-                cbar_kws={'label': 'Performance Score'}, annot_kws={'fontsize': 12})    # Added annotation font size
+                cbar_kws={'label': 'Performance Score'}, annot_kws={'fontsize': 12})
     ax2.set_title("Remaining Performance After Anonymization\n(Absolute Scores)", 
-                  fontsize=18, fontweight='bold')    # Increased from 14
-    ax2.set_xlabel("Model", fontsize=16)    # Increased from 12
-    ax2.set_ylabel("Anonymization Technique", fontsize=16)    # Increased from 12
+                  fontsize=18, fontweight='bold')
+    ax2.set_xlabel("Model", fontsize=16)
+    ax2.set_ylabel("Anonymization Technique", fontsize=16)
     
     plt.suptitle(f"{dataset} Dataset - Model Impact Analysis", 
-                 fontsize=22, fontweight='bold', y=1.02)    # Increased from 18
+                 fontsize=22, fontweight='bold', y=1.02)
     plt.tight_layout()
     
     if save_path:
@@ -816,14 +816,14 @@ def plot_anonymization_technique_ranking(results, dataset, save_path=None):
     bars = plt.barh(range(len(techniques)), performances, color=colors)
     
     plt.yticks(range(len(techniques)), [t.replace(" (", "\n(") for t in techniques])
-    plt.xlabel("Average Performance Score", fontsize=18)    # Increased from 14
+    plt.xlabel("Average Performance Score", fontsize=18)
     plt.title(f"{dataset} Dataset - Anonymization Technique Ranking\n(By Average Performance Preservation)", 
-              fontsize=20, fontweight='bold')    # Increased from 16
+              fontsize=20, fontweight='bold')
     
     # Add value labels
     for i, (bar, perf) in enumerate(zip(bars, performances)):
         plt.text(perf + 0.01, bar.get_y() + bar.get_height()/2, 
-                f'{perf:.3f}', va='center', fontsize=14, fontweight='bold')    # Increased from 11
+                f'{perf:.3f}', va='center', fontsize=14, fontweight='bold')
     
     plt.grid(True, alpha=0.3, axis='x')
     plt.tight_layout()
@@ -837,7 +837,7 @@ def plot_anonymization_technique_ranking(results, dataset, save_path=None):
 
 # Generate all Iris visualizations
 def generate_dataset_visualizations(dataset_name):
-    """Generate all visualizations for a specific dataset"""
+    """Generate comprehensive visualization suite for specified dataset"""
     dataset = dataset_name
     
     if dataset not in results:
@@ -846,40 +846,40 @@ def generate_dataset_visualizations(dataset_name):
     
     print(f"Generating {dataset} dataset visualizations...")
     
-    # Create output directory
+    # Initialize output directory structure
     output_dir = f"{dataset.lower().replace(' ', '_')}_visualizations"
     os.makedirs(output_dir, exist_ok=True)
     
-    # Get available metrics for this dataset
+    # Determine dataset-specific metrics
     sample_model = list(results[dataset]["Original"].keys())[0]
     available_metrics = list(results[dataset]["Original"][sample_model].keys())
     
-    # Generate individual metric bar charts for all available metrics
+    # Create metric-specific comparative visualizations
     for metric in available_metrics:
         plot_summary_bar(results, dataset, metric, 
                         save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_{metric}_comparison.png")
     
-    # Generate heatmap
+    # Create performance correlation matrix
     plot_anonymization_impact_heatmap(results, dataset, 
                                     save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_performance_heatmap.png")
     
-    # Generate performance degradation analysis
+    # Analyze temporal performance trends
     plot_performance_degradation(results, dataset, 
                                 save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_performance_degradation.png")
     
-    # Generate privacy vs utility trade-off
+    # Visualize privacy-utility relationship
     plot_anonymization_comparison(results, dataset, 
                                 save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_privacy_utility_tradeoff.png")
     
-    # NEW: Generate percentage degradation analysis
+    # Quantify relative performance loss
     plot_percentage_degradation(results, dataset,
                                save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_percentage_degradation.png")
     
-    # NEW: Generate model impact analysis
+    # Assess model-specific vulnerabilities
     plot_model_impact_analysis(results, dataset,
                               save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_model_impact_analysis.png")
     
-    # NEW: Generate anonymization technique ranking
+    # Rank techniques by effectiveness
     plot_anonymization_technique_ranking(results, dataset,
                                        save_path=f"{output_dir}/{dataset.lower().replace(' ', '_')}_technique_ranking.png")
     
@@ -887,7 +887,7 @@ def generate_dataset_visualizations(dataset_name):
     print(f"Generated charts for metrics: {', '.join(available_metrics)}")
 
 def generate_combined_dataset_comparison(save_path_prefix="combined_analysis"):
-    """Generate combined visualizations comparing all datasets"""
+    """Generate cross-dataset comparative analysis suite"""
     
     if not results:
         print("No data available for combined analysis")
@@ -895,25 +895,25 @@ def generate_combined_dataset_comparison(save_path_prefix="combined_analysis"):
     
     print("Generating combined dataset comparison visualizations...")
     
-    # Create output directory
+    # Initialize comparative analysis directory
     output_dir = "combined_visualizations"
     os.makedirs(output_dir, exist_ok=True)
     
-    # Combined performance comparison across datasets
+    # Cross-dataset performance analysis
     plot_combined_dataset_performance(save_path=f"{output_dir}/{save_path_prefix}_performance_comparison.png")
     
-    # Combined anonymization technique effectiveness
+    # Technique effectiveness comparison
     plot_combined_technique_effectiveness(save_path=f"{output_dir}/{save_path_prefix}_technique_effectiveness.png")
     
-    # Combined model robustness analysis
+    # Model robustness assessment
     plot_combined_model_robustness(save_path=f"{output_dir}/{save_path_prefix}_model_robustness.png")
     
     print(f"Combined visualizations saved to '{output_dir}' directory!")
 
 def plot_combined_dataset_performance(save_path=None):
-    """Create a comprehensive comparison across all datasets"""
+    """Generate comprehensive cross-dataset performance analysis"""
     
-    # Prepare data for cross-dataset comparison
+    # Structure data for comparative analysis
     combined_data = []
     
     for dataset, anon_data in results.items():
@@ -921,7 +921,7 @@ def plot_combined_dataset_performance(save_path=None):
             for model, metrics in models.items():
                 avg_performance = sum(metrics.values()) / len(metrics)
                 
-                # Calculate degradation from original if not original
+                # Compute relative performance degradation
                 if anon != "Original":
                     original_avg = sum(anon_data["Original"][model].values()) / len(anon_data["Original"][model])
                     degradation_pct = ((original_avg - avg_performance) / original_avg) * 100 if original_avg > 0 else 0
@@ -938,44 +938,44 @@ def plot_combined_dataset_performance(save_path=None):
     
     df = pd.DataFrame(combined_data)
     
-    # Create subplots for different analyses
+    # Initialize multi-panel analysis layout
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(20, 16))
     
-    # 1. Performance heatmap across datasets
+    # Panel 1: Cross-dataset performance matrix
     performance_pivot = df[df["Anonymization"] != "Original"].pivot_table(
         index=["Dataset", "Anonymization"], 
         columns="Model", 
         values="Average Performance"
     )
     sns.heatmap(performance_pivot, annot=True, fmt='.3f', cmap='RdYlGn', ax=ax1)
-    ax1.set_title("Performance Across All Datasets\n(After Anonymization)", fontsize=18, fontweight='bold')  # Increased from 14
+    ax1.set_title("Performance Across All Datasets\n(After Anonymization)", fontsize=18, fontweight='bold')
     
-    # 2. Degradation comparison
+    # Panel 2: Degradation impact analysis
     degradation_pivot = df[df["Anonymization"] != "Original"].pivot_table(
         index=["Dataset", "Anonymization"],
         columns="Model",
         values="Degradation (%)"
     )
     sns.heatmap(degradation_pivot, annot=True, fmt='.1f', cmap='Reds', ax=ax2)
-    ax2.set_title("Performance Degradation %\n(Across All Datasets)", fontsize=18, fontweight='bold')  # Increased from 14
+    ax2.set_title("Performance Degradation %\n(Across All Datasets)", fontsize=18, fontweight='bold')
     
-    # 3. Dataset sensitivity to anonymization
+    # Panel 3: Dataset vulnerability assessment
     dataset_sensitivity = df.groupby(["Dataset", "Anonymization"])["Degradation (%)"].mean().reset_index()
     dataset_sensitivity = dataset_sensitivity[dataset_sensitivity["Anonymization"] != "Original"]
     
     sns.boxplot(data=dataset_sensitivity, x="Dataset", y="Degradation (%)", ax=ax3)
-    ax3.set_title("Dataset Sensitivity to Anonymization\n(Distribution of Degradation)", fontsize=18, fontweight='bold')  # Increased from 14
+    ax3.set_title("Dataset Sensitivity to Anonymization\n(Distribution of Degradation)", fontsize=18, fontweight='bold')
     ax3.tick_params(axis='x', rotation=45)
     
-    # 4. Model robustness across datasets
+    # Panel 4: Model resilience comparison
     model_robustness = df.groupby(["Model", "Dataset"])["Degradation (%)"].mean().reset_index()
     model_robustness = model_robustness[model_robustness["Dataset"] != "Original"]
     
     sns.barplot(data=model_robustness, x="Model", y="Degradation (%)", hue="Dataset", ax=ax4)
-    ax4.set_title("Model Robustness Across Datasets\n(Average Degradation)", fontsize=18, fontweight='bold')  # Increased from 14
+    ax4.set_title("Model Robustness Across Datasets\n(Average Degradation)", fontsize=18, fontweight='bold')
     ax4.legend(title="Dataset", bbox_to_anchor=(1.05, 1), loc='upper left')
     
-    plt.suptitle("Comprehensive Cross-Dataset Analysis", fontsize=24, fontweight='bold', y=0.98)  # Increased from 20
+    plt.suptitle("Comprehensive Cross-Dataset Analysis", fontsize=24, fontweight='bold', y=0.98)
     plt.tight_layout()
     
     if save_path:
@@ -986,9 +986,9 @@ def plot_combined_dataset_performance(save_path=None):
     plt.close()
 
 def plot_combined_technique_effectiveness(save_path=None):
-    """Compare anonymization technique effectiveness across all datasets"""
+    """Analyze technique effectiveness across dataset types"""
     
-    # Calculate technique effectiveness across datasets
+    # Compute cross-dataset technique performance
     technique_data = []
     
     for dataset, anon_data in results.items():
@@ -1021,17 +1021,17 @@ def plot_combined_technique_effectiveness(save_path=None):
     
     plt.figure(figsize=(16, 10))
     
-    # Create grouped bar chart
+    # Generate comparative effectiveness visualization
     sns.barplot(data=df, x="Anonymization", y="Performance Preservation (%)", hue="Dataset", palette="deep")
     
     plt.title("Anonymization Technique Effectiveness Across Datasets\n(Performance Preservation %)", 
-              fontsize=22, fontweight='bold')    # Increased from 18
-    plt.xlabel("Anonymization Technique", fontsize=18)    # Increased from 14
-    plt.ylabel("Performance Preservation (%)", fontsize=18)    # Increased from 14
+              fontsize=22, fontweight='bold')
+    plt.xlabel("Anonymization Technique", fontsize=18)
+    plt.ylabel("Performance Preservation (%)", fontsize=18)
     plt.xticks(rotation=45, ha='right')
     plt.legend(title="Dataset", bbox_to_anchor=(1.05, 1), loc='upper left')
     
-    # Add horizontal line at 90% preservation
+    # Mark acceptable performance threshold
     plt.axhline(y=90, color='red', linestyle='--', alpha=0.7, label='90% Preservation Threshold')
     
     plt.grid(True, alpha=0.3, axis='y')
@@ -1045,9 +1045,9 @@ def plot_combined_technique_effectiveness(save_path=None):
     plt.close()
 
 def plot_combined_model_robustness(save_path=None):
-    """Compare model robustness across datasets and anonymization techniques"""
+    """Assess model resilience across datasets and techniques"""
     
-    # Calculate model robustness data
+    # Compute model vulnerability metrics
     robustness_data = []
     
     for dataset, anon_data in results.items():
@@ -1072,20 +1072,20 @@ def plot_combined_model_robustness(save_path=None):
                 "Dataset": dataset,
                 "Model": model,
                 "Average Degradation (%)": avg_degradation,
-                "Robustness Score": max(0, 100 - avg_degradation)  # Higher score = more robust
+                "Robustness Score": max(0, 100 - avg_degradation)  # Inverse relationship: higher score indicates greater robustness
             })
     
     df = pd.DataFrame(robustness_data)
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
     
-    # Degradation comparison
+    # Panel 1: Vulnerability assessment
     sns.barplot(data=df, x="Model", y="Average Degradation (%)", hue="Dataset", ax=ax1)
     ax1.set_title("Model Vulnerability to Anonymization\n(Average Degradation Across Techniques)", 
                   fontsize=14, fontweight='bold')
     ax1.legend(title="Dataset", bbox_to_anchor=(1.05, 1), loc='upper left')
     
-    # Robustness score comparison
+    # Panel 2: Resilience scoring
     sns.barplot(data=df, x="Model", y="Robustness Score", hue="Dataset", ax=ax2)
     ax2.set_title("Model Robustness Score\n(Higher = More Robust to Anonymization)", 
                   fontsize=14, fontweight='bold')
@@ -1103,44 +1103,44 @@ def plot_combined_model_robustness(save_path=None):
 
 # Convenience functions for generating specific dataset visualizations
 def generate_iris_visualizations():
-    """Generate all visualizations for Iris dataset"""
+    """Create complete Iris dataset analysis suite"""
     generate_dataset_visualizations("Iris")
 
 def generate_breast_cancer_visualizations():
-    """Generate all visualizations for Breast Cancer dataset"""
+    """Create complete Breast Cancer dataset analysis suite"""
     generate_dataset_visualizations("Breast Cancer")
 
 def generate_handwritten_digits_visualizations():
-    """Generate all visualizations for Handwritten Digits dataset"""
+    """Create complete Handwritten Digits dataset analysis suite"""
     generate_dataset_visualizations("Handwritten Digits")
 
 def generate_adult_income_visualizations():
-    """Generate all visualizations for Adult Income dataset"""
+    """Create complete Adult Income dataset analysis suite"""
     generate_dataset_visualizations("Adult Income")
 
 def generate_all_visualizations():
-    """Generate visualizations for all available datasets plus combined analysis"""
+    """Execute comprehensive analysis across all datasets"""
     available_datasets = list(results.keys())
     
     print(f"Generating visualizations for all datasets: {available_datasets}")
     
-    # Generate individual dataset visualizations
+    # Process each dataset independently
     for dataset in available_datasets:
         generate_dataset_visualizations(dataset)
     
-    # Generate combined analysis if multiple datasets available
+    # Execute cross-dataset comparative analysis
     if len(available_datasets) > 1:
         generate_combined_dataset_comparison()
     
     print("All visualizations generated successfully!")
 
-# Generate individual dataset visualizations
-generate_iris_visualizations()                    # Simple features
-generate_breast_cancer_visualizations()           # Medical features
-generate_handwritten_digits_visualizations()      # High-dimensional pixels
+# Execute dataset-specific analysis workflows
+generate_iris_visualizations()                    # Botanical classification dataset
+generate_breast_cancer_visualizations()           # Medical diagnostic dataset
+generate_handwritten_digits_visualizations()      # Computer vision dataset
 
-# Generate powerful cross-dataset comparison
-generate_combined_dataset_comparison()            # Shows privacy-utility patterns across data types
+# Execute cross-dataset comparative analysis
+generate_combined_dataset_comparison()            # Privacy-utility trade-off patterns across domains
 
-# Generate everything at once
-generate_all_visualizations()                     # Complete thesis-ready visualization suite
+# Execute comprehensive analysis pipeline
+generate_all_visualizations()                     # Complete academic visualization suite
