@@ -109,3 +109,8 @@ ml_models/check_plugins.py
 
 # Unwanted dashboard analysis folder in ml_models/src (local only)
 ml_models/src/dashboard_analyse/
+
+# Unused anonymizers files (local only)
+ml_models/src/anonymizers/k_anonymity_core.py
+ml_models/src/anonymizers/dynamic_manual_rules_anonymizer.py
+ml_models/src/anonymizers/slicing_anonymizer.py
